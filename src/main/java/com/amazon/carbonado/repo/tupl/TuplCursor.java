@@ -64,8 +64,18 @@ class TuplCursor<S extends Storable> extends RawCursor<S> {
     }
 
     @Override
+    public void close() throws FetchException {
+        try {
+            super.close();
+        } finally {
+            mScope.unregister(mStorage.getStorableType(), this);
+        }
+    }
+
+    @Override
     protected void release() throws FetchException {
         mSource.reset();
+        mSource.link(null);
     }
 
     @Override

@@ -160,6 +160,8 @@ class TuplRepository extends AbstractRepository<TuplTransaction>
             mDb.close();
         } catch (Exception e) {
         }
+        mRootRef.set(null);
+        mLayoutFactory = null;
     }
 
     @Override
