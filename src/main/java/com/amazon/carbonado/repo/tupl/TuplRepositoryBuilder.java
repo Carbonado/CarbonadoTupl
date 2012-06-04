@@ -120,11 +120,21 @@ public final class TuplRepositoryBuilder extends AbstractRepositoryBuilder {
         return mBaseFile;
     }
 
+    /**
+     * Set the base file name for the database, which must reside in an
+     * ordinary file directory. If no base file is provided, database is
+     * non-durable and cannot exceed the size of the cache.
+     */
     public void setBaseFile(File file) {
         mBaseFile = file;
         mConfig.baseFile(file);
     }
 
+    /**
+     * Set the base file name for the database, which must reside in an
+     * ordinary file directory. If no base file is provided, database is
+     * non-durable and cannot exceed the size of the cache.
+     */
     public void setBaseFilePath(String path) {
         setBaseFile(new File(path));
     }
@@ -133,48 +143,124 @@ public final class TuplRepositoryBuilder extends AbstractRepositoryBuilder {
         return mDataFile == null ? mBaseFile : mDataFile;
     }
 
+    /**
+     * Set the data file for the database, which by default resides in the same
+     * directory as the base file. The data file can be in a separate
+     * directory, and it can even be a raw block device.
+     */
     public void setDataFile(File file) {
         mDataFile = file;
         mConfig.dataFile(file);
     }
 
+    /**
+     * Set the data file for the database, which by default resides in the same
+     * directory as the base file. The data file can be in a separate
+     * directory, and it can even be a raw block device.
+     */
     public void setDataFilePath(String path) {
         setDataFile(new File(path));
     }
 
+    /**
+     * Set the minimum cache size, overriding the default.
+     *
+     * @param minBytes cache size, in bytes
+     */
     public void setMinCacheSize(long minBytes) {
         mConfig.minCacheSize(minBytes);
     }
 
+    /**
+     * Set the maximum cache size, overriding the default.
+     *
+     * @param maxBytes cache size, in bytes
+     */
     public void setMaxCacheSize(long maxBytes) {
         mConfig.maxCacheSize(maxBytes);
     }
 
+    /**
+     * Set the default durability mode to sync, which ensures all modifications
+     * are persisted to non-volatile storage.
+     *
+     * <p>If database itself is non-durabile, durability modes are ignored.
+     */
     public void setDurabilitySync(boolean b) {
         mConfig.durabilityMode(DurabilityMode.SYNC);
     }
 
+    /**
+     * Set the default durability mode to no-sync, which permits the operating
+     * system to lazily persist modifications to non-volatile storage. This
+     * mode is vulnerable to power failures and operating system crashes. These
+     * events can cause recently committed transactions to get lost.
+     *
+     * <p>If database itself is non-durabile, durability modes are ignored.
+     */
     public void setDurabilityNoSync(boolean b) {
         mConfig.durabilityMode(DurabilityMode.NO_SYNC);
     }
 
+    /**
+     * Set the default durability mode to no-flush, writes modifications to the
+     * file system when the in-process buffer is full. This mode is vulnerable
+     * to power failures, operating system crashes, and process crashes. These
+     * events can cause recently committed transactions to get lost. When the
+     * process exits cleanly, a shutdown hook switches this mode to behave like
+     * no-sync and flushes the log.
+     *
+     * <p>If database itself is non-durabile, durability modes are ignored.
+     */
     public void setDurabilityNoFlush(boolean b) {
         mConfig.durabilityMode(DurabilityMode.NO_FLUSH);
     }
 
+    /**
+     * Set the default durability mode to no-log, which doesn't write anything
+     * to the redo log. An unlogged transaction does not become durable until a
+     * checkpoint is performed. In addition to the vulnerabilities of no-flush
+     * mode, no-log mode can lose recently committed transactions when the
+     * process exits.
+     *
+     * <p>If database itself is non-durabile, durability modes are ignored.
+     */
     public void setDurabilityNoLog(boolean b) {
         mConfig.durabilityMode(DurabilityMode.NO_LOG);
     }
 
+    /**
+     * Set the default lock acquisition timeout, which is 1000 milliseconds if
+     * not overridden. A negative timeout is infinite.
+     */
     public void setLockTimeoutMillis(long millis) {
         mConfig.lockTimeout(millis, TimeUnit.MILLISECONDS);
     }
 
+    /**
+     * Set the rate at which checkpoints are automatically performed. Default
+     * rate is 1000 milliseconds. Pass a negative value to disable automatic
+     * checkpoints.
+     */
+    public void setCheckpointRateMillis(long millis) {
+        mConfig.checkpointRate(millis, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * Set the page size, which is 4096 bytes by default.
+     */
     public void setPageSize(int size) {
         mConfig.pageSize(size);
     }
 
+    /**
+     * Use the given config object instead of the methods on this
+     * builder. Instance is not cloned.
+     */
     public void setConfig(DatabaseConfig config) {
+        if (config == null) {
+            throw new IllegalArgumentException();
+        }
         mConfig = config;
     }
 
