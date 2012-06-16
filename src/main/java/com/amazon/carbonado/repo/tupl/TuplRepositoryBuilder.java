@@ -43,6 +43,37 @@ import com.amazon.carbonado.spi.AbstractRepositoryBuilder;
  * @author Brian S O'Neill
  */
 public final class TuplRepositoryBuilder extends AbstractRepositoryBuilder {
+    private static int cNameId;
+
+    /**
+     * Convenience method to build a new non-durable TuplRepository. Maximum
+     * allowed size is 100MB.
+     */
+    public static Repository newRepository() {
+        return newRepository(100L * 1024 * 1024);
+    }
+
+    /**
+     * Convenience method to build a new non-durable TuplRepository.
+     *
+     * @param maxSizeBytes maximum allowed size, in bytes
+     */
+    public static Repository newRepository(long maxSizeBytes) {
+        try {
+            TuplRepositoryBuilder builder = new TuplRepositoryBuilder();
+            builder.setMaxCacheSize(maxSizeBytes);
+            int id;
+            synchronized (TuplRepositoryBuilder.class) {
+                id = cNameId++;
+            }
+            builder.setName("tupl-" + id);
+            return builder.build();
+        } catch (RepositoryException e) {
+            // Not expected.
+            throw new RuntimeException(e);
+        }
+    }
+
     private String mName;
     private boolean mMaster;
     private DatabaseConfig mConfig;
