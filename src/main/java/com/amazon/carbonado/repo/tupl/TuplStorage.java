@@ -211,6 +211,7 @@ class TuplStorage<S extends Storable> implements Storage<S>, StorageAccess<S> {
     @Override
     public void truncate() throws PersistException {
         if (mTriggerManager.getDeleteTrigger() != null) {
+            Transaction txn = mRepo.getRootRepository().enterTransaction(IsolationLevel.NONE);
             try {
                 Cursor<S> cursor = query().fetch();
                 try {
@@ -223,6 +224,8 @@ class TuplStorage<S extends Storable> implements Storage<S>, StorageAccess<S> {
                 return;
             } catch (FetchException e) {
                 throw e.toPersistException();
+            } finally {
+                txn.exit();
             }
         }
 
