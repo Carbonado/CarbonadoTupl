@@ -24,6 +24,7 @@ import com.amazon.carbonado.FetchException;
 import com.amazon.carbonado.Storable;
 
 import com.amazon.carbonado.raw.RawCursor;
+import com.amazon.carbonado.raw.RawUtil;
 
 import com.amazon.carbonado.txn.TransactionScope;
 
@@ -146,7 +147,18 @@ class TuplCursor<S extends Storable> extends RawCursor<S> {
     protected boolean toLast(byte[] key) throws FetchException {
         try {
             if (mInclusiveEnd) {
-                mSource.findLe(key);
+                // Moving to the last entry of a range is a special case. Add
+                // one to the key and find the highest which is less than it.
+                // This destroys the caller's key value, but the toLast(byte[])
+                // contract allows this.
+                if (RawUtil.increment(key)) {
+                    mSource.findLe(key);
+                } else {
+                    // This point is reached upon overflow, because key looked
+                    // like: 0xff, 0xff, 0xff, 0xff...  So moving to the
+                    // absolute last is just fine.
+                    mSource.last();
+                }
             } else {
                 mSource.findLt(key);
             }
