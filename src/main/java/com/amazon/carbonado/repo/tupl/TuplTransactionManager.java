@@ -60,16 +60,10 @@ class TuplTransactionManager extends TransactionManager<TuplTransaction> {
     protected TuplTransaction createTxn(TuplTransaction parent, IsolationLevel level)
         throws Exception
     {
-        Transaction txn;
-        if (parent == null) {
-            txn = mDb.newTransaction();
-        } else {
-            txn = parent.mTxn;
-            txn.enter();
-        }
-
         LockMode mode;
         switch (level) {
+        case NONE:
+            return null;
         case READ_UNCOMMITTED:
             mode = LockMode.READ_UNCOMMITTED;
             break;
@@ -84,6 +78,14 @@ class TuplTransactionManager extends TransactionManager<TuplTransaction> {
             break;
         }
 
+        Transaction txn;
+        if (parent == null) {
+            txn = mDb.newTransaction();
+        } else {
+            txn = parent.mTxn;
+            txn.enter();
+        }
+
         return new TuplTransaction(txn, mode);
     }
 
@@ -93,7 +95,9 @@ class TuplTransactionManager extends TransactionManager<TuplTransaction> {
         throws Exception
     {
         TuplTransaction txn = createTxn(parent, level);
-        txn.mTxn.lockTimeout(timeout, unit);
+        if (txn != null) {
+            txn.mTxn.lockTimeout(timeout, unit);
+        }
         return txn;
     }
 
