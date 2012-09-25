@@ -115,7 +115,7 @@ class TuplCursor<S extends Storable> extends RawCursor<S> {
             mSource.first();
             return mSource.value() != null;
         } catch (Exception e) {
-            throw TuplExceptionTransformer.THE.toFetchException(e);
+            throw mStorage.exTransformer().toFetchException(e);
         }
     }
 
@@ -129,7 +129,7 @@ class TuplCursor<S extends Storable> extends RawCursor<S> {
             }
             return mSource.value() != null;
         } catch (Exception e) {
-            throw TuplExceptionTransformer.THE.toFetchException(e);
+            throw mStorage.exTransformer().toFetchException(e);
         }
     }
 
@@ -139,7 +139,7 @@ class TuplCursor<S extends Storable> extends RawCursor<S> {
             mSource.last();
             return mSource.value() != null;
         } catch (Exception e) {
-            throw TuplExceptionTransformer.THE.toFetchException(e);
+            throw mStorage.exTransformer().toFetchException(e);
         }
     }
 
@@ -164,7 +164,7 @@ class TuplCursor<S extends Storable> extends RawCursor<S> {
             }
             return mSource.value() != null;
         } catch (Exception e) {
-            throw TuplExceptionTransformer.THE.toFetchException(e);
+            throw mStorage.exTransformer().toFetchException(e);
         }
     }
 
@@ -174,7 +174,7 @@ class TuplCursor<S extends Storable> extends RawCursor<S> {
             mSource.next();
             return mSource.value() != null;
         } catch (Exception e) {
-            throw TuplExceptionTransformer.THE.toFetchException(e);
+            throw mStorage.exTransformer().toFetchException(e);
         }
     }
 
@@ -184,7 +184,7 @@ class TuplCursor<S extends Storable> extends RawCursor<S> {
             mSource.previous();
             return mSource.value() != null;
         } catch (Exception e) {
-            throw TuplExceptionTransformer.THE.toFetchException(e);
+            throw mStorage.exTransformer().toFetchException(e);
         }
     }
 }

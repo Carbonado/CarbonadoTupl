@@ -18,7 +18,10 @@
 
 package com.amazon.carbonado.repo.tupl;
 
+import org.cojen.tupl.Database;
 import org.cojen.tupl.DeadlockException;
+import org.cojen.tupl.DeadlockSet;
+import org.cojen.tupl.Index;
 import org.cojen.tupl.LockFailureException;
 import org.cojen.tupl.LockInterruptedException;
 import org.cojen.tupl.LockTimeoutException;
@@ -32,6 +35,7 @@ import com.amazon.carbonado.PersistException;
 import com.amazon.carbonado.PersistInterruptedException;
 import com.amazon.carbonado.PersistTimeoutException;
 import com.amazon.carbonado.RepositoryException;
+import com.amazon.carbonado.Storable;
 
 import com.amazon.carbonado.spi.ExceptionTransformer;
 
@@ -41,7 +45,14 @@ import com.amazon.carbonado.spi.ExceptionTransformer;
  * @author Brian S O'Neill
  */
 class TuplExceptionTransformer extends ExceptionTransformer {
-    static final TuplExceptionTransformer THE = new TuplExceptionTransformer();
+    private final TuplRepository mRepo;
+
+    /**
+     * @param repo non-null to allow deadlock exceptions to show more information
+     */
+    TuplExceptionTransformer(TuplRepository repo) {
+        mRepo = repo;
+    }
 
     @Override
     protected FetchException transformIntoFetchException(Throwable e) {
@@ -52,7 +63,9 @@ class TuplExceptionTransformer extends ExceptionTransformer {
         if (e instanceof LockFailureException) {
             if (e instanceof LockTimeoutException) {
                 if (e instanceof DeadlockException) {
-                    return new FetchDeadlockException(e);
+                    String message = messageFrom((DeadlockException) e);
+                    return message == null ? new FetchDeadlockException(e)
+                        : new FetchDeadlockException(message);
                 }
                 return new FetchTimeoutException(e);
             }
@@ -72,7 +85,9 @@ class TuplExceptionTransformer extends ExceptionTransformer {
         if (e instanceof LockFailureException) {
             if (e instanceof LockTimeoutException) {
                 if (e instanceof DeadlockException) {
-                    return new PersistDeadlockException(e);
+                    String message = messageFrom((DeadlockException) e);
+                    return message == null ? new PersistDeadlockException(e)
+                        : new PersistDeadlockException(message);
                 }
                 return new PersistTimeoutException(e);
             }
@@ -81,5 +96,48 @@ class TuplExceptionTransformer extends ExceptionTransformer {
             }
         }
         return null;
+    }
+
+    private String messageFrom(DeadlockException e) {
+        if (mRepo == null) {
+            return null;
+        }
+
+        DeadlockSet set = e.getDeadlockSet();
+        int size;
+        if (set == null || (size = set.size()) == 0) {
+            return null;
+        }
+
+        try {
+            Database db = mRepo.mDb;
+
+            StringBuilder b = new StringBuilder(e.getShortMessage());
+
+            b.append(" Deadlock set: ");
+            b.append('[');
+
+            for (int i=0; i<size; i++) {
+                if (i > 0) {
+                    b.append(", ");
+                }
+                b.append('{');
+                Index ix = db.indexById(set.getIndexId(i));
+                if (ix == null) {
+                    return null;
+                }
+                Class clazz = Class.forName(ix.getNameString());
+                TuplStorage storage = (TuplStorage) mRepo.storageFor(clazz);
+                Storable storable = storage.mStorableCodec.instantiate(set.getKey(i));
+                b.append(storable);
+                b.append('}');
+            }
+
+            b.append(']');
+
+            return b.toString();
+        } catch (Throwable e2) {
+            return null;
+        }
     }
 }

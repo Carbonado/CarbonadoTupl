@@ -46,7 +46,7 @@ class TuplTransaction {
         try {
             mTxn.commit();
         } catch (Exception e) {
-            throw TuplExceptionTransformer.THE.toPersistException(e);
+            throw new TuplExceptionTransformer(null).toPersistException(e);
         }
     }
 
@@ -54,7 +54,7 @@ class TuplTransaction {
         try {
             mTxn.exit();
         } catch (Exception e) {
-            throw TuplExceptionTransformer.THE.toPersistException(e);
+            throw new TuplExceptionTransformer(null).toPersistException(e);
         }
     }
 }

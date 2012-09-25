@@ -238,7 +238,7 @@ class TuplStorage<S extends Storable> implements Storage<S>, StorageAccess<S> {
                 cursor.next();
             }
         } catch (Exception e) {
-            throw TuplExceptionTransformer.THE.toPersistException(e);
+            throw exTransformer().toPersistException(e);
         } finally {
             cursor.reset();
         }
@@ -420,7 +420,7 @@ class TuplStorage<S extends Storable> implements Storage<S>, StorageAccess<S> {
                  reverseOrder,
                  this);
         } catch (Exception e) {
-            throw TuplExceptionTransformer.THE.toFetchException(e);
+            throw exTransformer().toFetchException(e);
         }
     }
 
@@ -461,6 +461,10 @@ class TuplStorage<S extends Storable> implements Storage<S>, StorageAccess<S> {
         System.arraycopy(exactKey, 0, bound, 0, exactKey.length);
         System.arraycopy(rangeKey, 0, bound, exactKey.length, rangeKey.length);
         return bound;
+    }
+
+    TuplExceptionTransformer exTransformer() {
+        return mRepo.mExTransformer;
     }
 
     IndexInfo[] getIndexInfo() {
@@ -711,7 +715,7 @@ class TuplStorage<S extends Storable> implements Storage<S>, StorageAccess<S> {
                 TuplTransaction txn = mRepo.localTransactionScope().getTxn();
                 return mIx.load(txn == null ? null : txn.mTxn, key);
             } catch (Throwable e) {
-                throw TuplExceptionTransformer.THE.toFetchException(e);
+                throw exTransformer().toFetchException(e);
             }
         }
 
@@ -721,7 +725,7 @@ class TuplStorage<S extends Storable> implements Storage<S>, StorageAccess<S> {
                 TuplTransaction txn = mRepo.localTransactionScope().getTxn();
                 return mIx.insert(txn == null ? null : txn.mTxn, key, value);
             } catch (Throwable e) {
-                throw TuplExceptionTransformer.THE.toPersistException(e);
+                throw exTransformer().toPersistException(e);
             }
         }
 
@@ -731,7 +735,7 @@ class TuplStorage<S extends Storable> implements Storage<S>, StorageAccess<S> {
                 TuplTransaction txn = mRepo.localTransactionScope().getTxn();
                 mIx.store(txn == null ? null : txn.mTxn, key, value);
             } catch (Throwable e) {
-                throw TuplExceptionTransformer.THE.toPersistException(e);
+                throw exTransformer().toPersistException(e);
             }
         }
 
@@ -741,7 +745,7 @@ class TuplStorage<S extends Storable> implements Storage<S>, StorageAccess<S> {
                 TuplTransaction txn = mRepo.localTransactionScope().getTxn();
                 return mIx.delete(txn == null ? null : txn.mTxn, key);
             } catch (Throwable e) {
-                throw TuplExceptionTransformer.THE.toPersistException(e);
+                throw exTransformer().toPersistException(e);
             }
         }
 

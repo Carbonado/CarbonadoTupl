@@ -82,6 +82,8 @@ class TuplRepository extends AbstractRepository<TuplTransaction>
 
     private final StorableCodecFactory mStorableCodecFactory;
 
+    final TuplExceptionTransformer mExTransformer;
+
     private LayoutFactory mLayoutFactory;
 
     TuplRepository(String name, boolean master, Iterable<TriggerFactory> triggerFactories,
@@ -98,6 +100,8 @@ class TuplRepository extends AbstractRepository<TuplTransaction>
         mTxnMgr = new TuplTransactionManager(db);
 
         mStorableCodecFactory = new CompressedStorableCodecFactory(null);
+
+        mExTransformer = new TuplExceptionTransformer(this);
     }
 
     @Override
@@ -176,7 +180,7 @@ class TuplRepository extends AbstractRepository<TuplTransaction>
         try {
             return new TuplStorage<S>(this, type);
         } catch (Exception e) {
-            throw TuplExceptionTransformer.THE.toRepositoryException(e);
+            throw mExTransformer.toRepositoryException(e);
         }
     }
 

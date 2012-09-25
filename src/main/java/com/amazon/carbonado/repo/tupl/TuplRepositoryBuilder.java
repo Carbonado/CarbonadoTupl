@@ -117,7 +117,7 @@ public final class TuplRepositoryBuilder extends AbstractRepositoryBuilder {
         try {
             db = Database.open(mConfig);
         } catch (IOException e) {
-            throw TuplExceptionTransformer.THE.toRepositoryException(e);
+            throw new TuplExceptionTransformer(null).toRepositoryException(e);
         }
 
         Repository repo = new TuplRepository
