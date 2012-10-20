@@ -152,7 +152,7 @@ class TuplCursor<S extends Storable> extends RawCursor<S> {
                 // This destroys the caller's key value, but the toLast(byte[])
                 // contract allows this.
                 if (RawUtil.increment(key)) {
-                    mSource.findLe(key);
+                    mSource.findLt(key);
                 } else {
                     // This point is reached upon overflow, because key looked
                     // like: 0xff, 0xff, 0xff, 0xff...  So moving to the
