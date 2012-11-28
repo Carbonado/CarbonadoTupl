@@ -101,7 +101,14 @@ class TuplCursor<S extends Storable> extends RawCursor<S> {
 
     @Override
     protected void enableKeyAndValue() throws FetchException {
-        mSource.autoload(true);
+        Cursor source = mSource;
+        if (!source.autoload(true) && source.value() == Cursor.NOT_LOADED) {
+            try {
+                source.load();
+            } catch (Exception e) {
+                throw mStorage.exTransformer().toFetchException(e);
+            }
+        }
     }
 
     @Override
