@@ -248,16 +248,16 @@ public final class TuplRepositoryBuilder extends AbstractRepositoryBuilder {
     }
 
     /**
-     * Set the default durability mode to no-log, which doesn't write anything
+     * Set the default durability mode to no-redo, which doesn't write anything
      * to the redo log. An unlogged transaction does not become durable until a
      * checkpoint is performed. In addition to the vulnerabilities of no-flush
-     * mode, no-log mode can lose recently committed transactions when the
+     * mode, no-redo mode can lose recently committed transactions when the
      * process exits.
      *
      * <p>If database itself is non-durabile, durability modes are ignored.
      */
-    public void setDurabilityNoLog(boolean b) {
-        mConfig.durabilityMode(DurabilityMode.NO_LOG);
+    public void setDurabilityNoRedo(boolean b) {
+        mConfig.durabilityMode(DurabilityMode.NO_REDO);
     }
 
     /**
