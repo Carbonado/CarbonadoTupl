@@ -77,6 +77,7 @@ class TuplRepository extends AbstractRepository<TuplTransaction>
     final Iterable<TriggerFactory> mTriggerFactories;
     private final AtomicReference<Repository> mRootRef;
     final Database mDb;
+    final Log mLog;
 
     private final TuplTransactionManager mTxnMgr;
 
@@ -88,13 +89,14 @@ class TuplRepository extends AbstractRepository<TuplTransaction>
 
     TuplRepository(String name, boolean master, Iterable<TriggerFactory> triggerFactories,
                    AtomicReference<Repository> rootRef,
-                   Database db)
+                   Database db, Log log)
     {
         super(name);
         mIsMaster = master;
         mTriggerFactories = triggerFactories;
         mRootRef = rootRef;
         mDb = db;
+        mLog = log;
         setAutoShutdownEnabled(false);
 
         mTxnMgr = new TuplTransactionManager(db);
@@ -170,7 +172,7 @@ class TuplRepository extends AbstractRepository<TuplTransaction>
 
     @Override
     protected Log getLog() {
-        return null;
+        return mLog;
     }
 
     @Override

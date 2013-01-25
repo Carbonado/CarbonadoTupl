@@ -25,6 +25,9 @@ import java.util.concurrent.TimeUnit;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.cojen.tupl.Database;
 import org.cojen.tupl.DatabaseConfig;
 import org.cojen.tupl.DurabilityMode;
@@ -113,6 +116,9 @@ public final class TuplRepositoryBuilder extends AbstractRepositoryBuilder {
 
         assertReady();
 
+        Log log = LogFactory.getLog(TuplRepository.class);
+        mConfig.eventListener(new LogEventListener(log, mName));
+
         Database db;
         try {
             db = Database.open(mConfig);
@@ -121,7 +127,7 @@ public final class TuplRepositoryBuilder extends AbstractRepositoryBuilder {
         }
 
         Repository repo = new TuplRepository
-            (mName, mMaster, getTriggerFactories(), rootReference, db);
+            (mName, mMaster, getTriggerFactories(), rootReference, db, log);
 
         rootReference.set(repo);
         return repo;
