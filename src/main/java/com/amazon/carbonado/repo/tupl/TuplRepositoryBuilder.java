@@ -116,8 +116,13 @@ public final class TuplRepositoryBuilder extends AbstractRepositoryBuilder {
 
         assertReady();
 
-        Log log = LogFactory.getLog(TuplRepository.class);
-        mConfig.eventListener(new LogEventListener(log, mName));
+        Log log;
+        if (mBaseFile == null) {
+            log = null;
+        } else {
+            log = LogFactory.getLog(TuplRepository.class);
+            mConfig.eventListener(new LogEventListener(log, mName));
+        }
 
         Database db;
         try {
