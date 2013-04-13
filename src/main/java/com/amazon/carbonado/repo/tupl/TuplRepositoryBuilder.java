@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.cojen.tupl.Database;
 import org.cojen.tupl.DatabaseConfig;
 import org.cojen.tupl.DurabilityMode;
+import org.cojen.tupl.LockUpgradeRule;
 
 import com.amazon.carbonado.ConfigurationException;
 import com.amazon.carbonado.Repository;
@@ -80,6 +81,8 @@ public final class TuplRepositoryBuilder extends AbstractRepositoryBuilder {
     private String mName;
     private boolean mMaster;
     private DatabaseConfig mConfig;
+    private DurabilityMode mDurabilityMode;
+    private LockUpgradeRule mLockUpgradeRule;
 
     private File mBaseFile;
     private File mDataFile;
@@ -108,6 +111,8 @@ public final class TuplRepositoryBuilder extends AbstractRepositoryBuilder {
                 ixBuilder.setMaster(isMaster());
                 ixBuilder.setIndexRepairEnabled(mIndexRepairEnabled);
                 ixBuilder.setIndexRepairThrottle(mIndexThrottle);
+                ixBuilder.setStrictTriggers
+                    (mLockUpgradeRule == null || mLockUpgradeRule == LockUpgradeRule.STRICT);
                 return ixBuilder.build(rootReference);
             } finally {
                 mIndexSupport = true;
@@ -227,9 +232,11 @@ public final class TuplRepositoryBuilder extends AbstractRepositoryBuilder {
      * are persisted to non-volatile storage.
      *
      * <p>If database itself is non-durabile, durability modes are ignored.
+     *
+     * @param b pass true for sync, false for no-sync
      */
     public void setDurabilitySync(boolean b) {
-        mConfig.durabilityMode(DurabilityMode.SYNC);
+        durabilityMode(DurabilityMode.SYNC, b, DurabilityMode.NO_SYNC);
     }
 
     /**
@@ -239,9 +246,11 @@ public final class TuplRepositoryBuilder extends AbstractRepositoryBuilder {
      * events can cause recently committed transactions to get lost.
      *
      * <p>If database itself is non-durabile, durability modes are ignored.
+     *
+     * @param b pass true for no-sync, false for sync
      */
     public void setDurabilityNoSync(boolean b) {
-        mConfig.durabilityMode(DurabilityMode.NO_SYNC);
+        durabilityMode(DurabilityMode.NO_SYNC, b, DurabilityMode.SYNC);
     }
 
     /**
@@ -253,9 +262,11 @@ public final class TuplRepositoryBuilder extends AbstractRepositoryBuilder {
      * no-sync and flushes the log.
      *
      * <p>If database itself is non-durabile, durability modes are ignored.
+     *
+     * @param b must be true
      */
     public void setDurabilityNoFlush(boolean b) {
-        mConfig.durabilityMode(DurabilityMode.NO_FLUSH);
+        durabilityMode(DurabilityMode.NO_FLUSH, b, null);
     }
 
     /**
@@ -266,9 +277,70 @@ public final class TuplRepositoryBuilder extends AbstractRepositoryBuilder {
      * process exits.
      *
      * <p>If database itself is non-durabile, durability modes are ignored.
+     *
+     * @param b must be true
      */
     public void setDurabilityNoRedo(boolean b) {
-        mConfig.durabilityMode(DurabilityMode.NO_REDO);
+        durabilityMode(DurabilityMode.NO_REDO, b, null);
+    }
+
+    private void durabilityMode(DurabilityMode mode, boolean b, DurabilityMode alt) {
+        if (mDurabilityMode != null) {
+            throw new IllegalArgumentException("Durability mode is already set");
+        }
+        if (!b) {
+            if (alt == null) {
+                throw new IllegalArgumentException("Setting must be true");
+            }
+            mode = alt;
+        }
+        mConfig.durabilityMode(mode);
+        mDurabilityMode = mode;
+    }
+
+    /**
+     * Set the lock upgrade rule to strict, which rejects shared lock upgrade attempts as
+     * illegal.
+     *
+     * @param b pass true for strict, false for lenient
+     */
+    public void setLockUpgradeStrict(boolean b) {
+        lockUpgradeRule(LockUpgradeRule.STRICT, b, LockUpgradeRule.LENIENT);
+    }
+
+    /**
+     * Set the lock upgrade rule to lenient, which accepts shared lock upgrade attempts when
+     * there are no conflicts. Any conflict causes an illegal lock upgrade exception to be
+     * thrown.
+     *
+     * @param b pass true for lenient, false for strict
+     */
+    public void setLockUpgradeLenient(boolean b) {
+        lockUpgradeRule(LockUpgradeRule.LENIENT, b, LockUpgradeRule.STRICT);
+    }
+
+    /**
+     * Set the lock upgrade rule to unchecked, which always accepts shared lock upgrade
+     * attempts, and is deadlock prone.
+     *
+     * @param b must be true
+     */
+    public void setLockUpgradeUnchecked(boolean b) {
+        lockUpgradeRule(LockUpgradeRule.UNCHECKED, b, null);
+    }
+
+    private void lockUpgradeRule(LockUpgradeRule rule, boolean b, LockUpgradeRule alt) {
+        if (mLockUpgradeRule != null) {
+            throw new IllegalArgumentException("Lock upgrade rule is already set");
+        }
+        if (!b) {
+            if (alt == null) {
+                throw new IllegalArgumentException("Setting must be true");
+            }
+            rule = alt;
+        }
+        mConfig.lockUpgradeRule(rule);
+        mLockUpgradeRule = rule;
     }
 
     /**
