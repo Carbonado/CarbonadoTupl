@@ -42,7 +42,34 @@ import com.amazon.carbonado.repo.indexed.IndexedRepositoryBuilder;
 import com.amazon.carbonado.spi.AbstractRepositoryBuilder;
 
 /**
- * 
+ * Builder and configuration options for TuplRepository. Construct a non-durable instance as
+ * follows:
+ *
+ * <pre>
+ * Repository repo = TuplRepositoryBuilder.newRepository();
+ * </pre>
+ *
+ * An example for constructing a durable instance:
+ *
+ * <pre>
+ * TuplRepositoryBuilder bob = new TuplRepositoryBuilder();
+ * bob.setName("test");
+ * bob.setBaseFilePath("/var/lib/tupl/test");
+ * bob.setMinCacheSize(100_000_000);
+ * bob.setDurabilityNoFlush(true); // improves write performance
+ * Repository repo = bob.build();
+ * </pre>
+ *
+ * <p>
+ * The following extra capabilities are supported:
+ * <ul>
+ * <li>{@link com.amazon.carbonado.capability.IndexInfoCapability IndexInfoCapability}
+ * <li>{@link com.amazon.carbonado.capability.StorableInfoCapability StorableInfoCapability}
+ * <li>{@link com.amazon.carbonado.capability.ShutdownCapability ShutdownCapability}
+ * <li>{@link com.amazon.carbonado.layout.LayoutCapability LayoutCapability}
+ * <li>{@link com.amazon.carbonado.sequence.SequenceCapability SequenceCapability}
+ * <li>{@link DatabaseAccessCapability DatabaseAccessCapability}
+ * </ul>
  *
  * @author Brian S O'Neill
  */
