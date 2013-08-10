@@ -159,6 +159,9 @@ class TuplStorage<S extends Storable> implements Storage<S>, StorageAccess<S> {
             }
         }
 
+        // Indicate that primary key is clustered, which can affect query analysis.
+        pkIndex = pkIndex.clustered(true);
+
         mStorableCodec = codecFactory.createCodec(type, pkIndex, repo.mIsMaster, layout, mSupport);
         mPrimaryKeyIndex = mStorableCodec.getPrimaryKeyIndex();
 
