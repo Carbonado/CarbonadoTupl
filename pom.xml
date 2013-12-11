@@ -9,12 +9,12 @@
   <description>
     Carbonado repository which uses The Unnamed Persistence Library.
   </description>
-  <url>http://carbonado.sourceforge.net/</url>
-  <inceptionYear>2006</inceptionYear>
+  <url>https://github.com/Carbonado/CarbonadoTupl/</url>
+  <inceptionYear>2012</inceptionYear>
 
   <organization>
     <name>Amazon Technologies, Inc.</name>
-    <url>http://sourceforge.net/projects/carbonado/</url>
+    <url>https://github.com/Carbonado/CarbonadoTupl/</url>
   </organization>
 
   <licenses>
@@ -25,13 +25,12 @@
   </licenses>
 
   <scm>
-    <connection>scm:svn:https://svn.sourceforge.net/svnroot/carbonado/trunk/CarbonadoTupl</connection>
-    <developerConnection>scm:svn:https://svn.sourceforge.net/svnroot/carbonado/trunk/CarbonadoTupl</developerConnection>
-    <url>http://svn.sourceforge.net/viewvc/carbonado/trunk/CarbonadoTupl/</url>
+    <connection>scm:git:https://github.com/Carbonado/CarbonadoTupl.git</connection>
+    <url>https://github.com/Carbonado/CarbonadoTupl/</url>
   </scm>
 
   <issueManagement>
-    <url>http://sourceforge.net/tracker/?group_id=171277</url>
+    <url>https://github.com/Carbonado/CarbonadoTupl/issues</url>
   </issueManagement>
 
   <mailingLists>
@@ -52,27 +51,6 @@
         <role>Project Lead</role>
       </roles>
     </developer>
-
-    <developer>
-      <name>Don Schneider</name>
-      <id>dondo_seattle</id>
-      <email>dondo_seattle@users.sourceforge.net</email>
-      <organization>Amazon Technologies, Inc.</organization>
-    </developer>
-
-    <developer>
-      <name>Vidya Iyer</name>
-      <id>vidyaiyer</id>
-      <email>vidyaiyer@users.sourceforge.net</email>
-      <organization>Amazon Technologies, Inc.</organization>
-    </developer>
-
-    <developer>
-      <name>Nicole Deflaux</name>
-      <id>deflaux</id>
-      <email>deflaux@users.sourceforge.net</email>
-      <organization>Amazon Technologies, Inc.</organization>
-    </developer>
   </developers>
 
   <dependencies>
@@ -81,6 +59,7 @@
       <artifactId>carbonado</artifactId>
       <version>1.2.3</version>
     </dependency>
+
     <dependency>
       <groupId>org.cojen</groupId>
       <artifactId>tupl</artifactId>
@@ -130,11 +109,11 @@
           <reportSet>
             <reports>
               <report>project-team</report>
-	      <report>mailing-list</report>
+              <report>mailing-list</report>
               <report>issue-tracking</report>
               <report>scm</report>
               <report>license</report>
-	    </reports>
+            </reports>
           </reportSet>
         </reportSets>
       </plugin>
