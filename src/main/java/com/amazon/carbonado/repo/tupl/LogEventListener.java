@@ -32,11 +32,11 @@ import org.cojen.tupl.EventType;
  *
  * @author Brian S O'Neill
  */
-class LogEventListener implements EventListener {
+public class LogEventListener implements EventListener {
     private final Log mLog;
     private final String mName;
 
-    LogEventListener(Log log, String name) {
+    public LogEventListener(Log log, String name) {
         mLog = log;
         mName = name;
     }
