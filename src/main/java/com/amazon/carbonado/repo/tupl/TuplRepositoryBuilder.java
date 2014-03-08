@@ -108,6 +108,7 @@ public final class TuplRepositoryBuilder extends AbstractRepositoryBuilder {
     private String mName;
     private boolean mMaster;
     private DatabaseConfig mConfig;
+    private Database mDatabase;
     private DurabilityMode mDurabilityMode;
     private LockUpgradeRule mLockUpgradeRule;
 
@@ -153,14 +154,18 @@ public final class TuplRepositoryBuilder extends AbstractRepositoryBuilder {
             log = null;
         } else {
             log = LogFactory.getLog(TuplRepository.class);
-            mConfig.eventListener(new LogEventListener(log, mName));
         }
 
-        Database db;
-        try {
-            db = Database.open(mConfig);
-        } catch (IOException e) {
-            throw new TuplExceptionTransformer(null).toRepositoryException(e);
+        Database db = mDatabase;
+        if (db == null) {
+            if (log != null) {
+                mConfig.eventListener(new LogEventListener(log, mName));
+            }
+            try {
+                db = Database.open(mConfig);
+            } catch (IOException e) {
+                throw new TuplExceptionTransformer(null).toRepositoryException(e);
+            }
         }
 
         Repository repo = new TuplRepository
@@ -403,6 +408,13 @@ public final class TuplRepositoryBuilder extends AbstractRepositoryBuilder {
             throw new IllegalArgumentException();
         }
         mConfig = config;
+    }
+
+    public void setDatabase(Database db) {
+        if (db == null) {
+            throw new IllegalArgumentException();
+        }
+        mDatabase = db;
     }
 
     /**
