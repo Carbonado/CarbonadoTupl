@@ -25,12 +25,14 @@ import org.cojen.tupl.Index;
 import org.cojen.tupl.LockFailureException;
 import org.cojen.tupl.LockInterruptedException;
 import org.cojen.tupl.LockTimeoutException;
+import org.cojen.tupl.UnmodifiableReplicaException;
 
 import com.amazon.carbonado.FetchDeadlockException;
 import com.amazon.carbonado.FetchException;
 import com.amazon.carbonado.FetchInterruptedException;
 import com.amazon.carbonado.FetchTimeoutException;
 import com.amazon.carbonado.PersistDeadlockException;
+import com.amazon.carbonado.PersistDeniedException;
 import com.amazon.carbonado.PersistException;
 import com.amazon.carbonado.PersistInterruptedException;
 import com.amazon.carbonado.PersistTimeoutException;
@@ -94,6 +96,9 @@ class TuplExceptionTransformer extends ExceptionTransformer {
             if (e instanceof LockInterruptedException) {
                 return new PersistInterruptedException(e);
             }
+        }
+        if (e instanceof UnmodifiableReplicaException) {
+            return new PersistDeniedException(e);
         }
         return null;
     }
