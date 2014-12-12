@@ -24,6 +24,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
 
+import org.cojen.util.SoftValueCache;
+
 import org.cojen.tupl.Database;
 
 import com.amazon.carbonado.Cursor;
@@ -87,6 +89,8 @@ class TuplRepository extends AbstractRepository<TuplTransaction>
 
     private LayoutFactory mLayoutFactory;
 
+    private final SoftValueCache<Long, TuplStorage> mIndexToStorageMap;
+
     TuplRepository(String name, boolean master, Iterable<TriggerFactory> triggerFactories,
                    AtomicReference<Repository> rootRef,
                    Database db, Log log)
@@ -104,6 +108,8 @@ class TuplRepository extends AbstractRepository<TuplTransaction>
         mStorableCodecFactory = new CompressedStorableCodecFactory(null);
 
         mExTransformer = new TuplExceptionTransformer(this);
+
+        mIndexToStorageMap = new SoftValueCache<Long, TuplStorage>(17);
     }
 
     @Override
@@ -180,7 +186,9 @@ class TuplRepository extends AbstractRepository<TuplTransaction>
         throws RepositoryException
     {
         try {
-            return new TuplStorage<S>(this, type);
+            TuplStorage<S> storage = new TuplStorage<S>(this, type);
+            mIndexToStorageMap.put(new Long(storage.mIx.getId()), storage);
+            return storage;
         } catch (Exception e) {
             throw mExTransformer.toRepositoryException(e);
         }
@@ -243,5 +251,9 @@ class TuplRepository extends AbstractRepository<TuplTransaction>
             mLayoutFactory = new LayoutFactory(getRootRepository());
         }
         return mLayoutFactory;
+    }
+
+    TuplStorage<?> storageByIndexId(long id) {
+        return mIndexToStorageMap.get(id);
     }
 }

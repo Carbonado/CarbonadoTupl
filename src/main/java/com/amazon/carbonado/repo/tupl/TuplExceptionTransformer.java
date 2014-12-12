@@ -131,8 +131,7 @@ class TuplExceptionTransformer extends ExceptionTransformer {
                 if (ix == null) {
                     return null;
                 }
-                Class clazz = Class.forName(ix.getNameString());
-                TuplStorage storage = (TuplStorage) mRepo.storageFor(clazz);
+                TuplStorage storage = mRepo.storageByIndexId(ix.getId());
                 Storable storable = storage.mStorableCodec.instantiate(set.getKey(i));
                 b.append(storable);
                 b.append('}');
