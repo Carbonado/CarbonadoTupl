@@ -112,6 +112,8 @@ public final class TuplRepositoryBuilder extends AbstractRepositoryBuilder {
     private DurabilityMode mDurabilityMode;
     private LockUpgradeRule mLockUpgradeRule;
 
+    private TuplPanicHandler mPanicHandler;
+
     private File mBaseFile;
     private File mDataFile;
 
@@ -158,13 +160,21 @@ public final class TuplRepositoryBuilder extends AbstractRepositoryBuilder {
 
         Database db = mDatabase;
         if (db == null) {
-            if (log != null) {
-                mConfig.eventListener(new LogEventListener(log, mName));
+            LogEventListener listener = null;
+
+            if (log != null || mPanicHandler != null) {
+                listener = new LogEventListener(log, mName, mPanicHandler);
+                mConfig.eventListener(listener);
             }
+
             try {
                 db = Database.open(mConfig);
             } catch (IOException e) {
                 throw new TuplExceptionTransformer(null).toRepositoryException(e);
+            }
+
+            if (listener != null) {
+                listener.setDatabase(db);
             }
         }
 
@@ -445,5 +455,23 @@ public final class TuplRepositoryBuilder extends AbstractRepositoryBuilder {
      */
     public void setIndexRepairThrottle(double desiredSpeed) {
         mIndexThrottle = desiredSpeed;
+    }
+
+    /**
+     * Set the handler to call if the database panics.
+     * 
+     * @param handler
+     */
+    public void setPanicHandler(TuplPanicHandler handler) {
+        mPanicHandler = handler;
+    }
+    
+    /**
+     * Return the panic handler to call if the database panics.
+     * 
+     * @return the TuplPanicHandler or null if unset.
+     */
+    public TuplPanicHandler getPanicHandler() {
+        return mPanicHandler;
     }
 }

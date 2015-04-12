@@ -24,6 +24,7 @@ import java.util.logging.Level;
 
 import org.apache.commons.logging.Log;
 
+import org.cojen.tupl.Database;
 import org.cojen.tupl.EventListener;
 import org.cojen.tupl.EventType;
 
@@ -35,32 +36,55 @@ import org.cojen.tupl.EventType;
 public class LogEventListener implements EventListener {
     private final Log mLog;
     private final String mName;
+    private final TuplPanicHandler mPanicHandler;
+
+    private Database mDatabase;
 
     public LogEventListener(Log log, String name) {
+        this(log, name, null);
+    }
+
+    /**
+     * @param log optional
+     * @param panicHandler optional
+     */
+    LogEventListener(Log log, String name, TuplPanicHandler panicHandler) {
         mLog = log;
         mName = name;
+        mPanicHandler = panicHandler;
+    }
+
+    void setDatabase(Database db) {
+        mDatabase = db;
     }
 
     @Override
     public void notify(EventType type, String message, Object... args) {
-        Log log = mLog;
         int intLevel = type.level.intValue();
-        if (intLevel <= Level.INFO.intValue()) {
-            if (type.category == EventType.Category.CHECKPOINT) {
-                if (log.isDebugEnabled()) {
-                    log.debug(format(type, message, args));
+
+        Log log = mLog;
+        if (log != null) {
+            if (intLevel <= Level.INFO.intValue()) {
+                if (type.category == EventType.Category.CHECKPOINT) {
+                    if (log.isDebugEnabled()) {
+                        log.debug(format(type, message, args));
+                    }
+                } else if (log.isInfoEnabled()) {
+                    log.info(format(type, message, args));
                 }
-            } else if (log.isInfoEnabled()) {
-                log.info(format(type, message, args));
+            } else if (intLevel <= Level.WARNING.intValue()) {
+                if (log.isWarnEnabled()) {
+                    log.warn(format(type, message, args));
+                }
+            } else if (intLevel <= Level.SEVERE.intValue()) {
+                if (log.isFatalEnabled()) {
+                    log.fatal(format(type, message, args));
+                }
             }
-        } else if (intLevel <= Level.WARNING.intValue()) {
-            if (log.isWarnEnabled()) {
-                log.warn(format(type, message, args));
-            }
-        } else if (intLevel <= Level.SEVERE.intValue()) {
-            if (log.isFatalEnabled()) {
-                log.fatal(format(type, message, args));
-            }
+        }
+
+        if (intLevel > Level.WARNING.intValue() && mPanicHandler != null) {
+            mPanicHandler.onPanic(mDatabase, type, message, args);
         }
     }
 
