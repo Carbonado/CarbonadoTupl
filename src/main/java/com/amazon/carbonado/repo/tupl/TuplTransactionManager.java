@@ -109,7 +109,7 @@ class TuplTransactionManager extends TransactionManager<TuplTransaction> {
     @Override
     protected boolean commitTxn(TuplTransaction txn) throws PersistException {
         txn.commit();
-        return true;
+        return false;
     }
 
     @Override

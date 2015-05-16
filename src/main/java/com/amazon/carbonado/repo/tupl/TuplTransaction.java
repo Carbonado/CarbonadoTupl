@@ -32,6 +32,8 @@ class TuplTransaction {
     final Transaction mTxn;
     final LockMode mOriginalMode;
 
+    private boolean mDone;
+
     TuplTransaction(Transaction txn, LockMode mode) {
         mTxn = txn;
         mOriginalMode = mode;
@@ -43,18 +45,25 @@ class TuplTransaction {
     }
 
     void commit() throws PersistException {
-        try {
-            mTxn.commit();
-        } catch (Exception e) {
-            throw new TuplExceptionTransformer(null).toPersistException(e);
+        if (!mDone) {
+            try {
+                mTxn.commit();
+                mTxn.exit();
+            } catch (Exception e) {
+                throw new TuplExceptionTransformer(null).toPersistException(e);
+            }
+            mDone = true;
         }
     }
 
     void abort() throws PersistException {
-        try {
-            mTxn.exit();
-        } catch (Exception e) {
-            throw new TuplExceptionTransformer(null).toPersistException(e);
+        if (!mDone) {
+            try {
+                mTxn.exit();
+            } catch (Exception e) {
+                throw new TuplExceptionTransformer(null).toPersistException(e);
+            }
+            mDone = true;
         }
     }
 }
